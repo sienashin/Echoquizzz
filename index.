@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EcoQuiz — 생태&환경 퀴즈</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1: #0f172a; /* deep navy */
+      --accent1: #00f5a0; /* neon green */
+      --accent2: #7c3aed; /* violet */
+      --accent3: #06b6d4; /* teal */
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.04);
+      --card-radius: 20px;
+      --glass-border: rgba(255,255,255,0.08);
+      color-scheme: dark;
+    }
+
+    /* Reset */
+    *{box-sizing:border-box}
+    html,body,#app{height:100%}
+    body{
+      margin:0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 700px at 10% 10%, rgba(124,58,237,0.12), transparent 8%),
+                  radial-gradient(1000px 600px at 90% 90%, rgba(6,182,212,0.08), transparent 10%),
+                  linear-gradient(180deg,var(--bg1) 0%, #071127 100%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+    }
+
+    /* App container fills viewport */
+    .container{
+      width:100%;max-width:1200px;height:100%;
+      display:flex;flex-direction:column;gap:18px;
+    }
+
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px 18px;border-radius:14px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--glass-border);
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      backdrop-filter: blur(8px);
+    }
+
+    .logo{
+      display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;color:white
+    }
+    .logo-badge{
+      width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
+      background: linear-gradient(135deg,var(--accent1),var(--accent2));
+      color:#051024;font-weight:900;font-size:20px;box-shadow:0 8px 24px rgba(124,58,237,0.24);
+    }
+
+    .controls{display:flex;gap:10px;align-items:center}
+    .btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:600}
+    .btn-ghost{background:transparent;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.06)}
+    .btn-primary{background:linear-gradient(90deg,var(--accent1),var(--accent3));color:#031018;box-shadow:0 12px 30px rgba(0,245,160,0.08)}
+
+    main{
+      flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+    }
+
+    .card{
+      width:100%;height:100%;padding:28px;border-radius:var(--card-radius);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--glass-border);box-shadow: 0 20px 60px rgba(2,6,23,0.6);display:flex;flex-direction:column;gap:18px;
+    }
+
+    .topbar{display:flex;align-items:center;justify-content:space-between}
+
+    .progress-wrap{flex:1;margin-left:18px}
+    .progress{height:10px;border-radius:999px;background:var(--glass);overflow:hidden}
+    .progress > i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--accent2),var(--accent1));transition:width 450ms cubic-bezier(.2,.8,.2,1)}
+
+    .question-area{display:flex;gap:20px;align-items:flex-start;flex:1}
+    .qside{flex:1}
+    .question{font-size:20px;font-weight:700;color:white;margin-bottom:8px}
+    .meta{font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:18px}
+
+    .options{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .opt{padding:14px;border-radius:12px;background:linear-gradient(180deg,var(--glass-2),transparent);border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:all 220ms;display:flex;gap:12px;align-items:center}
+    .opt:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,0.45)}
+    .opt.selected{outline:3px solid rgba(255,255,255,0.04);box-shadow:0 14px 40px rgba(0,0,0,0.6)}
+    .opt.correct{background:linear-gradient(90deg, rgba(0,245,160,0.12), rgba(124,58,237,0.06));border:1px solid rgba(0,245,160,0.24)}
+    .opt.wrong{background:linear-gradient(90deg, rgba(255,75,75,0.06), rgba(255,255,255,0.02));border:1px solid rgba(255,75,75,0.14)}
+
+    .opt .label{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font-weight:800;background:rgba(0,0,0,0.25);color:white}
+    .opt .text{font-weight:600;color:rgba(255,255,255,0.92)}
+
+    .rightpane{width:320px;display:flex;flex-direction:column;gap:14px}
+    .card-mini{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--glass-border)}
+
+    .footer{display:flex;gap:12px;align-items:center;justify-content:flex-end}
+    .big{font-size:18px;font-weight:800}
+
+    /* small screens */
+    @media (max-width:900px){
+      .question-area{flex-direction:column}
+      .options{grid-template-columns:1fr}
+      .rightpane{width:100%}
+    }
+
+    /* Confetti canvas covers main area */
+    #confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+
+    /* micro-animations */
+    .pulse{animation:pulse 2.4s infinite}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+
+    footer.note{color:rgba(255,255,255,0.6);font-size:13px;text-align:center;padding:8px}
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-badge">E</div>
+        <div>
+          <div style="font-size:14px;opacity:0.9">EcoQuiz</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">생태 & 환경 퀴즈 — 배우며 지키는 지구</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-ghost" id="shuffleBtn" title="문제 섞기">🔀 섞기</button>
+        <button class="btn btn-ghost" id="resetBtn" title="퀴즈 초기화">⟲ 초기화</button>
+        <button class="btn btn-primary" id="startBtn">시작하기</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <div class="topbar">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-weight:800;color:rgba(255,255,255,0.95)">문제 <span id="qIndex">0</span>/<span id="qTotal">0</span></div>
+            <div class="meta" id="difficulty">난이도: 쉽음</div>
+            <div class="progress-wrap">
+              <div class="progress"><i id="progressBar"></i></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="card-mini" id="timer">⏱️ 00:00</div>
+            <div class="card-mini">💯 점수: <span id="score">0</span></div>
+          </div>
+        </div>
+
+        <div class="question-area">
+          <div class="qside">
+            <div class="question" id="questionText">준비되면 시작을 눌러주세요.</div>
+            <div class="meta" id="explainText">퀴즈는 환경 관련 상식과 생태 지식을 다룹니다. 예시 문제들을 포함하고 있어요.</div>
+
+            <div class="options" id="options"></div>
+          </div>
+
+          <aside class="rightpane">
+            <div class="card-mini">
+              <div style="font-size:13px;color:rgba(255,255,255,0.65);">정답 해설</div>
+              <div id="explanation" style="margin-top:8px;font-weight:600;color:rgba(255,255,255,0.92)">정답을 고르면 해설이 표시됩니다.</div>
+            </div>
+
+            <div class="card-mini">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-size:13px;color:rgba(255,255,255,0.65)">남은 문제</div>
+                <div id="remaining" style="font-weight:800">0</div>
+              </div>
+            </div>
+
+            <div class="card-mini">
+              <div style="font-size:13px;color:rgba(255,255,255,0.65)">하이스코어</div>
+              <div id="highscore" style="font-weight:900;font-size:18px;margin-top:6px">0</div>
+            </div>
+
+            <div style="margin-top:auto;display:flex;gap:8px">
+              <button class="btn btn-ghost" id="prevBtn">◀ 이전</button>
+              <button class="btn btn-primary" id="nextBtn">다음 ▶</button>
+            </div>
+          </aside>
+        </div>
+
+        <div class="footer">
+          <div style="flex:1;color:rgba(255,255,255,0.6);font-size:13px">환경 퀴즈 — 교육용 콘텐츠입니다. (수정 가능)</div>
+          <div style="display:flex;gap:8px">
+            <button id="addQ" class="btn btn-ghost">➕ 문제 추가</button>
+            <button id="downloadBtn" class="btn btn-ghost">⬇ 저장</button>
+          </div>
+        </div>
+
+      </div>
+      <canvas id="confetti"></canvas>
+    </main>
+
+    <footer class="note">Tip: <strong>시작하기</strong>를 눌러 퀴즈를 풀고, 원하는 문항은 script 내부의 <code>questions</code> 배열을 편집해 바꿀 수 있습니다.</footer>
+  </div>
+
+  <script>
+    // Questions: edit these to customize the quiz. Each item: {q, opts, answer (index), explanation, difficulty}
+    const questions = [
+      {q:'지구 온난화의 주된 원인이 아닌 것은?', opts:['화석연료 연소','삼림 파괴','화산 폭발','메탄 배출'], answer:2, explanation:'화산 폭발은 단기적 기후변화를 일으킬 수 있지만 현재의 지속적인 지구온난화의 주원인은 인간 활동(화석연료, 산림 파괴, 농업 등)입니다.', difficulty:'중'},
+      {q:'다음 중 생물다양성이 높은 서식지는?', opts:['단일 작물 재배지','도시 중심가','열대우림','사막'], answer:2, explanation:'열대우림은 다양한 기후와 구조로 인해 세계에서 생물다양성이 가장 높은 지역 중 하나입니다.', difficulty:'쉬움'},
+      {q:'플라스틱 오염 문제에서 미세플라스틱이 인체와 생태계에 유해한 이유로 옳지 않은 것은?', opts:['생물체의 소화기관을 막는다','화학물질을 흡착해 전달한다','자기발광 특성이 있어 햇빛을 반사한다','먹이사슬을 통해 축적된다'], answer:2, explanation:'미세플라스틱은 자체로 자기발광 특성이 없으며, 주된 문제는 물리적·화학적 영향과 축적성입니다.', difficulty:'중'},
+      {q:'재생에너지의 대표적인 예가 아닌 것은?', opts:['태양광','풍력','석탄 화력','지열'], answer:2, explanation:'석탄 화력은 재생불가능한 화석연료 기반 발전 방식입니다.', difficulty:'쉬움'},
+      {q:'멸종위기종을 보호하기 위한 효과적인 방법은?', opts:['서식지 복원','밀렵 장려','서식지 파괴','불법 무역 촉진'], answer:0, explanation:'서식지 복원 및 보호는 멸종위기종 보전에 가장 중요한 전략 중 하나입니다.', difficulty:'쉬움'},
+      {q:'탄소발자국(carbon footprint)을 줄이기 위한 실천으로 적절하지 않은 것은?', opts:['대중교통 이용','육류 중심 식단 확대','에너지 효율 가전 사용','일회용품 줄이기'], answer:1, explanation:'육류, 특히 소고기 중심의 식단은 온실가스 배출이 높아 탄소발자국을 늘릴 수 있습니다.', difficulty:'중'},
+      {q:'하천의 부영양화(eutrophication) 주요 원인은?', opts:['질소와 인의 과다 유입','담수 어종의 과다 포획','강바닥 준설','수온 저하'], answer:0, explanation:'농업비료나 하수로 인한 질소·인의 과다 유입이 조류번성과 부영양화를 유발합니다.', difficulty:'중'},
+      {q:'도시열섬 현상을 완화시키는 방법으로 적절한 것은?', opts:['아스팔트 면적 확대','녹지 확대 및 옥상녹화','건물 높이 제한 철폐','밤에 더 많은 가로등 설치'], answer:1, explanation:'녹지 확대와 옥상녹화는 증발산과 그늘을 통해 표면온도를 낮춰 도시열섬을 완화합니다.', difficulty:'쉬움'}
+    ];
+
+    // App state
+    let state = {
+      idx:0,score:0,started:false,selected:null,shuffled:[],timeStart:null,totalSeconds:0
+    };
+
+    // Elements
+    const qIndex = document.getElementById('qIndex');
+    const qTotal = document.getElementById('qTotal');
+    const questionText = document.getElementById('questionText');
+    const explainText = document.getElementById('explainText');
+    const optionsDiv = document.getElementById('options');
+    const explanation = document.getElementById('explanation');
+    const remaining = document.getElementById('remaining');
+    const scoreEl = document.getElementById('score');
+    const highscoreEl = document.getElementById('highscore');
+    const progressBar = document.getElementById('progressBar');
+    const qTotalEl = document.getElementById('qTotal');
+    const timerEl = document.getElementById('timer');
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const addQBtn = document.getElementById('addQ');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    // Confetti canvas
+    const confettiCanvas = document.getElementById('confetti');
+    const cc = confettiCanvas.getContext && confettiCanvas.getContext('2d');
+    function resizeCanvas(){confettiCanvas.width = confettiCanvas.clientWidth; confettiCanvas.height = confettiCanvas.clientHeight}
+    window.addEventListener('resize',resizeCanvas);
+    resizeCanvas();
+
+    // util: shuffle indices
+    function shuffledIndices(n){const arr=Array.from({length:n},(_,i)=>i);for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+
+    function init(){
+      state.idx=0;state.score=0;state.selected=null;state.started=false;state.totalSeconds=0;state.timeStart=null;
+      state.shuffled = shuffledIndices(questions.length);
+      qTotal.textContent = questions.length; qTotalEl.textContent = questions.length;
+      remaining.textContent = questions.length;
+      scoreEl.textContent = 0; explanation.textContent = '정답을 고르면 해설이 표시됩니다.';
+      const hs = localStorage.getItem('ecoHighscore') || 0; highscoreEl.textContent = hs;
+      progressBar.style.width = '0%';
+      questionText.textContent = '준비되면 시작을 눌러주세요.'; explainText.textContent = '퀴즈는 환경 관련 상식과 생태 지식을 다룹니다.';
+      optionsDiv.innerHTML = '';
+    }
+
+    function renderQuestion(){
+      const realIdx = state.shuffled[state.idx];
+      const item = questions[realIdx];
+      qIndex.textContent = state.idx+1; qTotal.textContent = questions.length;
+      questionText.textContent = item.q;
+      explainText.textContent = `난이도: ${item.difficulty}`;
+      remaining.textContent = questions.length - (state.idx);
+
+      optionsDiv.innerHTML = '';
+      item.opts.forEach((t,i)=>{
+        const el = document.createElement('div');el.className='opt';el.dataset.i=i;
+        el.innerHTML = `<div class="label">${String.fromCharCode(65+i)}</div><div class="text">${t}</div>`;
+        el.addEventListener('click',()=>selectOption(el,i));
+        optionsDiv.appendChild(el);
+      });
+
+      // update progress
+      const pct = Math.round((state.idx / questions.length)*100);
+      progressBar.style.width = pct + '%';
+
+      // update timer start
+      if(!state.timeStart){state.timeStart = Date.now()}
+    }
+
+    function selectOption(el,i){
+      if(!state.started) return;
+      if(state.selected!==null) return; // only first answer counts
+      state.selected = i;
+      const realIdx = state.shuffled[state.idx];
+      const item = questions[realIdx];
+      const optsEls = Array.from(optionsDiv.children);
+      optsEls.forEach((o,idx)=>{
+        o.classList.remove('selected');
+        if(idx===i) o.classList.add('selected');
+      });
+
+      // mark correct/wrong
+      optsEls.forEach((o,idx)=>{
+        if(idx===item.answer) o.classList.add('correct');
+        else if(idx===i && idx!==item.answer) o.classList.add('wrong');
+        o.style.pointerEvents='none';
+      });
+
+      // update score
+      if(i===item.answer){state.score+=10;scoreEl.textContent=state.score; explanation.textContent = item.explanation; triggerConfetti();}
+      else {explanation.textContent = item.explanation}
+
+      // update progress bar to reflect answered
+      const pct = Math.round(((state.idx+1) / questions.length)*100);
+      progressBar.style.width = pct + '%';
+
+      // auto-advance after a short delay
+      setTimeout(()=>{
+        // allow manual next as well
+      },600);
+
+      // update highscore
+      const hs = Number(localStorage.getItem('ecoHighscore')||0);
+      if(state.score>hs) {localStorage.setItem('ecoHighscore',state.score);highscoreEl.textContent=state.score}
+    }
+
+    prevBtn.addEventListener('click',()=>{
+      if(state.idx>0){state.idx--;state.selected=null;renderQuestion();}
+    });
+
+    nextBtn.addEventListener('click',()=>{
+      if(!state.started){alert('먼저 시작을 눌러주세요.');return}
+      if(state.idx < questions.length-1){state.idx++;state.selected=null;renderQuestion();}
+      else {finishQuiz();}
+    });
+
+    startBtn.addEventListener('click',()=>{
+      if(!state.started){state.started=true;state.timeStart = Date.now();startBtn.textContent='중단';renderQuestion();}
+      else {state.started=false;startBtn.textContent='다시 시작';}
+    });
+
+    resetBtn.addEventListener('click',()=>{
+      if(confirm('퀴즈를 초기화하고 처음부터 시작할까요?')){init();}
+    });
+
+    shuffleBtn.addEventListener('click',()=>{state.shuffled = shuffledIndices(questions.length);state.idx=0;init();renderQuestion();});
+
+    addQBtn.addEventListener('click',()=>{
+      const q = prompt('문제 문장을 입력하세요'); if(!q) return;
+      const opts = [];
+      for(let i=0;i<4;i++){const o = prompt(`옵션 ${i+1} 입력 (취소하면 빈칸)`);opts.push(o||'');}
+      const ans = Number(prompt('정답 인덱스(0~3)를 숫자로 입력하세요'));
+      const exp = prompt('해설을 입력하세요')||'';
+      const diff = prompt('난이도 (쉬움/중/어려움)')||'중';
+      questions.push({q,opts,answer:ans,explanation:exp,difficulty:diff});
+      state.shuffled = shuffledIndices(questions.length);init();renderQuestion();
+    });
+
+    downloadBtn.addEventListener('click',()=>{
+      const blob = new Blob([document.documentElement.outerHTML],{type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');a.href=url;a.download='ecoquiz.html';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    });
+
+    // timer tick
+    setInterval(()=>{
+      if(state.started && state.timeStart){
+        const sec = Math.floor((Date.now()-state.timeStart)/1000);
+        const m = String(Math.floor(sec/60)).padStart(2,'0');
+        const s = String(sec%60).padStart(2,'0');
+        timerEl.textContent = `⏱️ ${m}:${s}`;
+      }
+    },500);
+
+    function finishQuiz(){
+      state.started=false;
+      const msg = `퀴즈 완료! 점수 ${state.score}점`;
+      alert(msg);
+      triggerConfetti(120);
+    }
+
+    // Simple confetti engine
+    const confettiPieces = [];
+    function triggerConfetti(n=40){
+      if(!cc) return;
+      for(let i=0;i<n;i++){
+        confettiPieces.push({
+          x: Math.random()*confettiCanvas.width,
+          y: -10 - Math.random()*50,
+          vx: -2 + Math.random()*4,
+          vy: 1+Math.random()*6,
+          size: 6+Math.random()*10,
+          rot: Math.random()*360,
+          vr: -5 + Math.random()*10,
+          color: `hsl(${Math.random()*360} 80% 60%)`,
+          life: 0, ttl: 80+Math.random()*80
+        });
+      }
+      if(!confettiAnimating) {confettiAnimating=true;requestAnimationFrame(confettiLoop)}
+    }
+    let confettiAnimating = false;
+    function confettiLoop(){
+      if(!cc) return;
+      cc.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+      for(let i=confettiPieces.length-1;i>=0;i--){
+        const p = confettiPieces[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.rot += p.vr; p.life++;
+        cc.save(); cc.translate(p.x,p.y); cc.rotate(p.rot*Math.PI/180);
+        cc.fillStyle = p.color; cc.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+        cc.restore();
+        if(p.life>p.ttl || p.y>confettiCanvas.height+50) confettiPieces.splice(i,1);
+      }
+      if(confettiPieces.length>0) requestAnimationFrame(confettiLoop); else confettiAnimating=false;
+    }
+
+    // initialize app
+    init();
+
+    // for convenience expose some data for editing in console
+    window.EcoQuiz = {questions, state};
+  </script>
+</body>
+</html>
